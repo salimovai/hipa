@@ -2353,3 +2353,270 @@ p {
         gap: 0.75rem;
     }
 }
+/* ==========================================
+   HIPA AI CHATBOT
+   ========================================== */
+
+.hipa-chatbot {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 9999;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.hipa-chat-button {
+    width: 62px;
+    height: 62px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary-red);
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(227, 30, 36, 0.35);
+    transition: all 0.3s ease;
+}
+
+.hipa-chat-button:hover {
+    transform: translateY(-3px) scale(1.04);
+    background: var(--dark-red);
+}
+
+.hipa-chat-window {
+    position: absolute;
+    right: 0;
+    bottom: 78px;
+
+    width: 380px;
+    height: 540px;
+
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.18);
+
+    display: flex;
+    flex-direction: column;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px) scale(0.97);
+
+    transition: all 0.25s ease;
+}
+
+.hipa-chat-window.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Header */
+
+.hipa-chat-header {
+    min-height: 72px;
+    padding: 12px 15px;
+
+    background: var(--primary-red);
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.hipa-chat-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+    background: #fff;
+    color: var(--primary-red);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+.hipa-chat-title {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.hipa-chat-title strong {
+    font-size: 14px;
+}
+
+.hipa-chat-title span {
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.hipa-chat-title span::before {
+    content: '';
+    display: inline-block;
+
+    width: 7px;
+    height: 7px;
+    margin-right: 5px;
+
+    border-radius: 50%;
+    background: #32d583;
+}
+
+.hipa-chat-close {
+    width: 34px;
+    height: 34px;
+
+    border: none;
+    background: transparent;
+    color: #fff;
+
+    cursor: pointer;
+    font-size: 17px;
+}
+
+/* Messages */
+
+.hipa-chat-messages {
+    flex: 1;
+    padding: 18px 14px;
+
+    overflow-y: auto;
+    background: var(--bg-soft);
+}
+
+.hipa-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-bottom: 14px;
+}
+
+.hipa-message-avatar {
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+    background: var(--primary-red);
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+}
+
+.hipa-message-content {
+    max-width: 82%;
+    padding: 11px 13px;
+
+    border-radius: 4px 14px 14px 14px;
+
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.hipa-message-content p {
+    margin: 0 0 7px;
+}
+
+.hipa-message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Input */
+
+.hipa-chat-input-area {
+    padding: 12px;
+
+    background: #fff;
+    border-top: 1px solid var(--gray-200);
+
+    display: flex;
+    gap: 8px;
+}
+
+.hipa-chat-input-area input {
+    flex: 1;
+
+    height: 44px;
+    padding: 0 13px;
+
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+
+    outline: none;
+
+    font-family: inherit;
+    font-size: 13px;
+
+    transition: border-color 0.2s ease;
+}
+
+.hipa-chat-input-area input:focus {
+    border-color: var(--primary-red);
+}
+
+.hipa-chat-input-area button {
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: var(--primary-red);
+    color: #fff;
+
+    cursor: pointer;
+    font-size: 15px;
+
+    transition: all 0.2s ease;
+}
+
+.hipa-chat-input-area button:hover {
+    background: var(--dark-red);
+}
+
+/* Mobile */
+
+@media (max-width: 480px) {
+
+    .hipa-chatbot {
+        right: 15px;
+        bottom: 15px;
+    }
+
+    .hipa-chat-button {
+        width: 56px;
+        height: 56px;
+        font-size: 21px;
+    }
+
+    .hipa-chat-window {
+        position: fixed;
+
+        right: 10px;
+        bottom: 80px;
+        left: 10px;
+
+        width: auto;
+        height: min(600px, calc(100vh - 110px));
+
+        border-radius: 16px;
+    }
+}
