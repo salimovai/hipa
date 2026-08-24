@@ -10,159 +10,385 @@ document.addEventListener('DOMContentLoaded', () => {
     const messages = document.getElementById('hipaChatMessages');
 
     // ==========================================
-    // TIL TIZIMI - FAQAT UZ va EN
+    // HIPA CHATBOT TRANSLATIONS
     // ==========================================
+
     const HIPA_TRANSLATIONS = {
+
         uz: {
             title: "HIPA AI Assistant",
             online: "Online",
-            greeting: "Assalomu alaykum! 👋<br><br>Men HIPA virtual yordamchisiman. HIPA kurslari va xizmatlari hamda buxgalteriya bo'yicha savollaringizga javob beraman.",
+
+            greeting: `
+                <p>Assalomu alaykum! 👋</p>
+                <p>
+                    Men HIPA virtual yordamchisiman.
+                    HIPA kurslari va xizmatlari hamda
+                    buxgalteriya bo‘yicha savollaringizga
+                    javob beraman.
+                </p>
+            `,
+
             placeholder: "Savolingizni yozing...",
-            demoReply: "Savolingiz qabul qilindi. AI yordamchi backendga ulangandan so'ng sizga batafsil javob beradi."
+
+            demoReply:
+                "Savolingiz qabul qilindi. AI yordamchi backendga ulangandan so‘ng sizga batafsil javob beradi."
         },
+
         en: {
             title: "HIPA AI Assistant",
             online: "Online",
-            greeting: "Hello! 👋<br><br>I am HIPA's virtual assistant. I can answer your questions about HIPA courses, services, and accounting.",
+
+            greeting: `
+                <p>Hello! 👋</p>
+                <p>
+                    I’m HIPA’s virtual assistant.
+                    I can answer your questions about
+                    HIPA courses, services and accounting.
+                </p>
+            `,
+
             placeholder: "Type your question...",
-            demoReply: "Your question has been received. Once the AI assistant is connected to the backend, it will provide a detailed answer."
+
+            demoReply:
+                "Your question has been received. Once the AI assistant is connected to the backend, it will provide a detailed answer."
         }
     };
 
-    function getCurrentLang() {
-        // 1. <html lang="en"> dan
-        const htmlLang = document.documentElement.lang? document.documentElement.lang.toLowerCase().substring(0,2) : '';
-        if (HIPA_TRANSLATIONS[htmlLang]) return htmlLang;
 
-        // 2. URL dan /en
-        if (window.location.pathname.toLowerCase().includes('/en') || window.location.search.toLowerCase().includes('lang=en')) {
+    // ==========================================
+    // SAYTNING HOZIRGI TILINI ANIQLASH
+    // ==========================================
+
+    function getCurrentLang() {
+
+        // 1. Faol til tugmasini tekshiramiz
+        const activeLangButton = document.querySelector('.lang-btn.active');
+
+        if (activeLangButton) {
+
+            const buttonLang =
+                activeLangButton.getAttribute('data-lang');
+
+            if (buttonLang === 'uz' || buttonLang === 'en') {
+                return buttonLang;
+            }
+        }
+
+
+        // 2. localStorage
+        const savedLanguage =
+            localStorage.getItem('language');
+
+        if (savedLanguage === 'uz' || savedLanguage === 'en') {
+            return savedLanguage;
+        }
+
+
+        // 3. HTML lang
+        const htmlLang =
+            (document.documentElement.lang || '')
+            .toLowerCase()
+            .substring(0, 2);
+
+        if (htmlLang === 'uz' || htmlLang === 'en') {
+            return htmlLang;
+        }
+
+
+        // 4. Sayt menyusidagi matnni tekshirish
+        const navText =
+            document.querySelector('.nav-menu')?.innerText || '';
+
+        if (
+            navText.includes('About Us') ||
+            navText.includes('Courses') ||
+            navText.includes('Contact')
+        ) {
             return 'en';
         }
 
-        // 3. localStorage dan
-        const saved = localStorage.getItem('hipa_lang') || localStorage.getItem('site_lang');
-        if (HIPA_TRANSLATIONS[saved]) return saved;
 
-        // 4. Menyu inglizcha bo'lsa - rasmdagi holat uchun
-        const menu = document.querySelector('nav')? document.querySelector('nav').innerText : '';
-        if (menu.includes('About Us') || menu.includes('Courses')) return 'en';
-
+        // Default
         return 'uz';
     }
 
+
+    // ==========================================
+    // CHATBOT TILINI YANGILASH
+    // ==========================================
+
     function updateChatLanguage() {
+
         const lang = getCurrentLang();
-        const t = HIPA_TRANSLATIONS[lang];
+        const translation = HIPA_TRANSLATIONS[lang];
 
-        const titleEl = document.querySelector('.hipa-chat-title strong');
-        const onlineEl = document.querySelector('.hipa-chat-title span');
+        // Header
+        const title =
+            document.querySelector('.hipa-chat-title strong');
 
-        if (titleEl) titleEl.textContent = t.title;
-        if (onlineEl) onlineEl.textContent = t.online;
-        if (input) input.placeholder = t.placeholder;
+        const online =
+            document.querySelector('.hipa-chat-title span');
 
-        // Birinchi xabarni to'g'irlash
+        if (title) {
+            title.textContent = translation.title;
+        }
+
+        if (online) {
+            online.textContent = translation.online;
+        }
+
+
+        // Input
+        if (input) {
+            input.placeholder = translation.placeholder;
+        }
+
+
+        // Birinchi bot xabarini TO‘LIQ almashtiramiz
         if (messages) {
-            const firstContent = messages.querySelector('.hipa-message-content p');
-            if (firstContent && messages.children.length <= 1) {
-                firstContent.innerHTML = t.greeting;
+
+            const firstMessage =
+                messages.querySelector('.hipa-bot-message');
+
+            if (firstMessage && messages.children.length === 1) {
+
+                const content =
+                    firstMessage.querySelector(
+                        '.hipa-message-content'
+                    );
+
+                if (content) {
+                    content.innerHTML =
+                        translation.greeting;
+                }
             }
         }
     }
 
+
+    // Dastlabki tilni o‘rnatish
     updateChatLanguage();
 
+
     // ==========================================
-    // CHATNI OCHISH / YOPISH - SIZNI KOD O'SHA
+    // CHATNI OCHISH
     // ==========================================
 
     if (chatButton && chatWindow) {
+
         chatButton.addEventListener('click', () => {
+
             chatWindow.classList.toggle('active');
+
             if (chatWrapper) {
                 chatWrapper.classList.toggle('active');
             }
+
             updateChatLanguage();
-            if (chatWindow.classList.contains('active') && input) {
-                setTimeout(() => input.focus(), 200);
+
+            if (
+                chatWindow.classList.contains('active') &&
+                input
+            ) {
+                setTimeout(() => {
+                    input.focus();
+                }, 200);
             }
         });
     }
 
+
+    // ==========================================
+    // CHATNI YOPISH
+    // ==========================================
+
     if (chatClose && chatWindow) {
+
         chatClose.addEventListener('click', () => {
+
             chatWindow.classList.remove('active');
+
             if (chatWrapper) {
                 chatWrapper.classList.remove('active');
             }
         });
     }
 
+
     // ==========================================
-    // XABAR QO'SHISH - SIZNI KOD O'SHA
+    // XABAR QO‘SHISH
     // ==========================================
+
     function addMessage(text, type) {
-        const message = document.createElement('div');
+
+        const message =
+            document.createElement('div');
+
 
         if (type === 'user') {
+
             message.className = 'hipa-message';
+
             message.style.justifyContent = 'flex-end';
+
             message.innerHTML = `
-                <div class="hipa-message-content"
-                     style="
+                <div
+                    class="hipa-message-content"
+                    style="
                         background: var(--primary-red);
                         color: #fff;
-                        border-radius: 14px 4px 14px 14px;
-                     ">
+                        border-radius:
+                        14px 4px 14px 14px;
+                    "
+                >
                     <p>${escapeHtml(text)}</p>
                 </div>
             `;
+
         } else {
-            message.className = 'hipa-message';
+
+            message.className =
+                'hipa-message hipa-bot-message';
+
             message.innerHTML = `
                 <div class="hipa-message-avatar">
                     <i class="fas fa-robot"></i>
                 </div>
+
                 <div class="hipa-message-content">
                     <p>${escapeHtml(text)}</p>
                 </div>
             `;
         }
 
+
         messages.appendChild(message);
-        messages.scrollTop = messages.scrollHeight;
+
+        messages.scrollTop =
+            messages.scrollHeight;
     }
 
+
+    // ==========================================
+    // XABAR YUBORISH
+    // ==========================================
+
     function sendMessage() {
-        const text = input.value.trim();
+
+        const text =
+            input.value.trim();
+
         if (!text) return;
 
+
+        // User xabari
         addMessage(text, 'user');
+
         input.value = '';
 
-        const lang = getCurrentLang();
-        const replyText = HIPA_TRANSLATIONS[lang].demoReply;
+
+        // Hozirgi sayt tili
+        const lang =
+            getCurrentLang();
+
+
+        const replyText =
+            HIPA_TRANSLATIONS[lang].demoReply;
+
 
         setTimeout(() => {
-            addMessage(replyText, 'bot');
+
+            addMessage(
+                replyText,
+                'bot'
+            );
+
         }, 500);
     }
 
+
+    // Send tugmasi
     if (sendButton) {
-        sendButton.addEventListener('click', sendMessage);
+
+        sendButton.addEventListener(
+            'click',
+            sendMessage
+        );
     }
 
+
+    // Enter
     if (input) {
-        input.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                sendMessage();
+
+        input.addEventListener(
+            'keydown',
+            (event) => {
+
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
             }
-        });
+        );
     }
+
+
+    // ==========================================
+    // SAYT TILI ALMASHGANDA CHATBOT HAM ALMASHADI
+    // ==========================================
+
+    const languageButtons =
+        document.querySelectorAll('.lang-btn');
+
+
+    languageButtons.forEach(button => {
+
+        button.addEventListener(
+            'click',
+            () => {
+
+                // main.js tilni almashtirib bo‘lgandan keyin
+                setTimeout(() => {
+                    updateChatLanguage();
+                }, 50);
+            }
+        );
+    });
+
+
+    // ==========================================
+    // HTML LANG O‘ZGARISHINI KUZATISH
+    // ==========================================
+
+    const languageObserver =
+        new MutationObserver(() => {
+
+            updateChatLanguage();
+
+        });
+
+
+    languageObserver.observe(
+        document.documentElement,
+        {
+            attributes: true,
+            attributeFilter: ['lang']
+        }
+    );
+
+
+    // ==========================================
+    // XAVFSIZ HTML
+    // ==========================================
 
     function escapeHtml(text) {
-        const div = document.createElement('div');
+
+        const div =
+            document.createElement('div');
+
         div.textContent = text;
+
         return div.innerHTML;
     }
+
 });
