@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messages = document.getElementById('hipaChatMessages');
 
     // ==========================================
-    // 1. TIL TIZIMI - YANGI QO'SHILDI
+    // TIL TIZIMI - FAQAT UZ va EN
     // ==========================================
     const HIPA_TRANSLATIONS = {
         uz: {
@@ -26,45 +26,34 @@ document.addEventListener('DOMContentLoaded', () => {
             greeting: "Hello! 👋<br><br>I am HIPA's virtual assistant. I can answer your questions about HIPA courses, services, and accounting.",
             placeholder: "Type your question...",
             demoReply: "Your question has been received. Once the AI assistant is connected to the backend, it will provide a detailed answer."
-        },
-        ru: {
-            title: "HIPA AI Assistant",
-            online: "В сети",
-            greeting: "Здравствуйте! 👋<br><br>Я виртуальный помощник HIPA. Я отвечу на ваши вопросы о курсах, услугах HIPA и бухгалтерии.",
-            placeholder: "Напишите ваш вопрос...",
-            demoReply: "Ваш вопрос принят. После подключения AI-помощника к бэкенду вы получите подробный ответ."
         }
     };
 
     function getCurrentLang() {
-        const htmlLang = document.documentElement.lang?.toLowerCase().slice(0,2);
-        if (htmlLang && HIPA_TRANSLATIONS[htmlLang]) return htmlLang;
+        // 1. <html lang="en"> dan
+        const htmlLang = document.documentElement.lang? document.documentElement.lang.toLowerCase().substring(0,2) : '';
+        if (HIPA_TRANSLATIONS[htmlLang]) return htmlLang;
 
-        const path = window.location.pathname.toLowerCase();
-        if (path.includes('/en')) return 'en';
-        if (path.includes('/ru')) return 'ru';
-        if (path.includes('/uz')) return 'uz';
+        // 2. URL dan /en
+        if (window.location.pathname.toLowerCase().includes('/en') || window.location.search.toLowerCase().includes('lang=en')) {
+            return 'en';
+        }
 
-        const urlLang = new URLSearchParams(window.location.search).get('lang');
-        if (urlLang && HIPA_TRANSLATIONS[urlLang]) return urlLang;
+        // 3. localStorage dan
+        const saved = localStorage.getItem('hipa_lang') || localStorage.getItem('site_lang');
+        if (HIPA_TRANSLATIONS[saved]) return saved;
 
-        const savedLang = localStorage.getItem('hipa_lang') || localStorage.getItem('site_lang');
-        if (savedLang && HIPA_TRANSLATIONS[savedLang]) return savedLang;
-
-        // Sayt ingliz tilida turganini aniqlash uchun - rasmdagi muammo uchun eng muhimi
-        const navText = document.body.innerText;
-        if (navText.includes('About Us') && navText.includes('Courses')) return 'en';
+        // 4. Menyu inglizcha bo'lsa - rasmdagi holat uchun
+        const menu = document.querySelector('nav')? document.querySelector('nav').innerText : '';
+        if (menu.includes('About Us') || menu.includes('Courses')) return 'en';
 
         return 'uz';
     }
 
-    function getT() {
-        const lang = getCurrentLang();
-        return HIPA_TRANSLATIONS[lang] || HIPA_TRANSLATIONS.uz;
-    }
-
     function updateChatLanguage() {
-        const t = getT();
+        const lang = getCurrentLang();
+        const t = HIPA_TRANSLATIONS[lang];
+
         const titleEl = document.querySelector('.hipa-chat-title strong');
         const onlineEl = document.querySelector('.hipa-chat-title span');
 
@@ -72,44 +61,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (onlineEl) onlineEl.textContent = t.online;
         if (input) input.placeholder = t.placeholder;
 
-        // Birinchi greeting xabarni ham tilga moslash (faqat birinchi marta)
-        const firstBotMessage = messages?.querySelector('.hipa-message.hipa-message-content p');
-        if (firstBotMessage && messages.children.length === 1) {
-            firstBotMessage.innerHTML = t.greeting;
+        // Birinchi xabarni to'g'irlash
+        if (messages) {
+            const firstContent = messages.querySelector('.hipa-message-content p');
+            if (firstContent && messages.children.length <= 1) {
+                firstContent.innerHTML = t.greeting;
+            }
         }
     }
 
-    // Boshlang'ich tilni sozlash
     updateChatLanguage();
 
     // ==========================================
-    // 2. CHATNI OCHISH / YOPISH - YAXSHILANGAN
+    // CHATNI OCHISH / YOPISH - SIZNI KOD O'SHA
     // ==========================================
 
-    // Chatni ochish
-    chatButton.addEventListener('click', () => {
-        chatWindow.classList.toggle('active');
-        chatWrapper?.classList.toggle('active'); // CSS to'lqin to'xtashi uchun
-        chatWrapper?.classList.toggle('wave-paused', chatWindow.classList.contains('active'));
+    if (chatButton && chatWindow) {
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+            if (chatWrapper) {
+                chatWrapper.classList.toggle('active');
+            }
+            updateChatLanguage();
+            if (chatWindow.classList.contains('active') && input) {
+                setTimeout(() => input.focus(), 200);
+            }
+        });
+    }
 
-        updateChatLanguage(); // Har ochilganda tilni tekshir
-
-        if (chatWindow.classList.contains('active')) {
-            setTimeout(() => input.focus(), 250);
-        }
-    });
-
-    // Chatni yopish
-    chatClose.addEventListener('click', () => {
-        chatWindow.classList.remove('active');
-        chatWrapper?.classList.remove('active', 'wave-paused');
-    });
+    if (chatClose && chatWindow) {
+        chatClose.addEventListener('click', () => {
+            chatWindow.classList.remove('active');
+            if (chatWrapper) {
+                chatWrapper.classList.remove('active');
+            }
+        });
+    }
 
     // ==========================================
-    // 3. XABAR QO'SHISH - ASOSAN O'SHA, LEKIN XAVFSIZROQ
+    // XABAR QO'SHISH - SIZNI KOD O'SHA
     // ==========================================
-
-    function addMessage(text, type, isHtml = false) {
+    function addMessage(text, type) {
         const message = document.createElement('div');
 
         if (type === 'user') {
@@ -132,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fas fa-robot"></i>
                 </div>
                 <div class="hipa-message-content">
-                    <p>${isHtml? text : escapeHtml(text)}</p>
+                    <p>${escapeHtml(text)}</p>
                 </div>
             `;
         }
@@ -141,48 +133,36 @@ document.addEventListener('DOMContentLoaded', () => {
         messages.scrollTop = messages.scrollHeight;
     }
 
-    // ==========================================
-    // 4. XABAR YUBORISH - TILGA MOS JAVOB
-    // ==========================================
-
     function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
 
-        const lang = getCurrentLang();
-        const t = getT();
-
         addMessage(text, 'user');
         input.value = '';
 
-        // Backendga yuborish uchun tilni ham qo'shib yuborish kerak bo'ladi
-        // fetch('/api/chat', { method: 'POST', body: JSON.stringify({ message: text, lang: lang }) })
+        const lang = getCurrentLang();
+        const replyText = HIPA_TRANSLATIONS[lang].demoReply;
 
         setTimeout(() => {
-            addMessage(t.demoReply, 'bot');
-        }, 600);
+            addMessage(replyText, 'bot');
+        }, 500);
     }
 
-    sendButton.addEventListener('click', sendMessage);
+    if (sendButton) {
+        sendButton.addEventListener('click', sendMessage);
+    }
 
-    input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    // ==========================================
-    // 5. XSS HIMOYASI - O'SHA HOLICHA
-    // ==========================================
+    if (input) {
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
 
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-
-    // Tashqi hodisa: saytda til o'zgarsa chatbot ham o'zgarsin
-    window.addEventListener('languageChanged', updateChatLanguage);
-    // Ba'zi saytlarda localStorage orqali til o'zgaradi, shuni kuzatish
-    window.addEventListener('storage', updateChatLanguage);
 });
