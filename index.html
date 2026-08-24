@@ -25,6 +25,62 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- HIPA AI CHATBOT -->
+<div class="hipa-chatbot">
+    <button class="hipa-chat-button" id="hipaChatButton" aria-label="HIPA AI yordamchi">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <div class="hipa-chat-window" id="hipaChatWindow">
+        <div class="hipa-chat-header">
+            <div class="hipa-chat-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+
+            <div class="hipa-chat-title">
+                <strong>HIPA AI Assistant</strong>
+                <span>Online</span>
+            </div>
+
+            <button class="hipa-chat-close" id="hipaChatClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="hipa-chat-messages" id="hipaChatMessages">
+            <div class="hipa-message hipa-bot-message">
+                <div class="hipa-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+
+                <div class="hipa-message-content">
+                    <p>
+                        Assalomu alaykum! 👋
+                    </p>
+                    <p>
+                        Men HIPA virtual yordamchisiman.
+                        HIPA kurslari va xizmatlari hamda
+                        buxgalteriya bo‘yicha savollaringizga
+                        javob beraman.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="hipa-chat-input-area">
+            <input
+                type="text"
+                id="hipaChatInput"
+                placeholder="Savolingizni yozing..."
+                autocomplete="off"
+            >
+
+            <button id="hipaSendButton" aria-label="Yuborish">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
     <!-- Preloader -->
     <div class="preloader" id="preloader">
         <div class="preloader-content">
@@ -1068,5 +1124,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <!-- Custom JavaScript -->
     <script src="js/main.js"></script>
+    <script src="js/chatbot.js"></script>
 </body>
 </html>
