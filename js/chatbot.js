@@ -273,41 +273,179 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // XABAR YUBORISH
     // ==========================================
+    // ==========================================
+// CHATBOT BACKEND
+// ==========================================
 
-    function sendMessage() {
-
-        const text =
-            input.value.trim();
-
-        if (!text) return;
-
-
-        // User xabari
-        addMessage(text, 'user');
-
-        input.value = '';
+const API_BASE_URL =
+    'https://hipa-backend-tj22.onrender.com/api';
 
 
-        // Hozirgi sayt tili
-        const lang =
-            getCurrentLang();
+// Chat tarixi
+const chatHistory = [];
 
 
-        const replyText =
-            HIPA_TRANSLATIONS[lang].demoReply;
+// ==========================================
+// XABAR YUBORISH
+// ==========================================
+
+async function sendMessage() {
+
+    const text =
+        input.value.trim();
+
+    if (!text) return;
 
 
-        setTimeout(() => {
+    // Hozirgi sayt tili
+    const lang =
+        getCurrentLang();
 
-            addMessage(
-                replyText,
-                'bot'
+
+    // User xabarini ko‘rsatish
+    addMessage(text, 'user');
+
+    input.value = '';
+
+
+    // Loading xabar
+    addMessage(
+        lang === 'uz'
+            ? 'Javob tayyorlanmoqda...'
+            : 'Preparing an answer...',
+        'bot'
+    );
+
+
+    // Loading xabarini topish
+    const loadingMessage =
+        messages.lastElementChild;
+
+
+    try {
+
+        // Backendga yuborish
+        const response =
+            await fetch(
+                `${API_BASE_URL}/chat`,
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body: JSON.stringify({
+
+                        message: text,
+
+                        language: lang,
+
+                        history: chatHistory
+
+                    })
+                }
             );
 
-        }, 500);
+
+        // HTTP xatosini tekshirish
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP error: ${response.status}`
+            );
+
+        }
+
+
+        // JSON javob
+        const data =
+            await response.json();
+
+
+        // Backend xatosi
+        if (!data.success) {
+
+            throw new Error(
+                data.error ||
+                'Backend error'
+            );
+
+        }
+
+
+        // AI javobi
+        const reply =
+            data.reply ||
+            (
+                lang === 'uz'
+                    ? 'Kechirasiz, javob olishda xatolik yuz berdi.'
+                    : 'Sorry, an error occurred while getting the answer.'
+            );
+
+
+        // Loading xabarini o‘chirish
+        if (loadingMessage) {
+            loadingMessage.remove();
+        }
+
+
+        // AI javobini chiqarish
+        addMessage(
+            reply,
+            'bot'
+        );
+
+
+        // Chat tarixiga user xabarini qo‘shish
+        chatHistory.push({
+            role: 'user',
+            content: text
+        });
+
+
+        // Chat tarixiga AI javobini qo‘shish
+        chatHistory.push({
+            role: 'assistant',
+            content: reply
+        });
+
+
+        // Juda katta history bo‘lib ketmasin
+        if (chatHistory.length > 20) {
+
+            chatHistory.splice(
+                0,
+                chatHistory.length - 20
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            'HIPA Chatbot Error:',
+            error
+        );
+
+
+        // Loading xabarini o‘chirish
+        if (loadingMessage) {
+            loadingMessage.remove();
+        }
+
+
+        // Foydalanuvchiga xato
+        addMessage(
+            lang === 'uz'
+                ? 'Kechirasiz, hozircha AI yordamchiga ulanishda muammo yuz berdi. Iltimos, birozdan keyin qayta urinib ko‘ring.'
+                : 'Sorry, there was a problem connecting to the AI assistant. Please try again later.',
+            'bot'
+        );
+
     }
-
-
+}
     // Send tugmasi
     if (sendButton) {
 
